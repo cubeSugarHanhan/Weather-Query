@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>天气查询</title>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+
+			html {
+				font-size: 10px;
+			}
+
+			body {
+				width: 100%;
+				height: 100vh;
+				background-image: url('https://api.dujin.org/bing/1920.php');
+				background-position: center;
+				background-size: cover;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			#inputBox {
+				width: 35.4rem;
+				height: 4.2rem;
+				padding-left: 2.1rem;
+				border-radius: 5rem 0 0 5rem;
+				border: none;
+				float: left;
+				outline: none;
+			}
+
+			#queryButton {
+				width: 8.6rem;
+				height: 4.2rem;
+				padding-right: 1.1rem;
+				border-radius: 0 5rem 5rem 0;
+				border: none;
+			}
+
+			#queryButton:hover {
+				cursor: Pointer;
+			}
+
+			#weatherInterface {
+				width: 46.1rem;
+				height: 23rem;
+				background-color: white;
+				margin-top: 4.2rem;
+				border-radius: 1rem;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-around;
+				align-items: center;
+			}
+
+			#basicFacts {
+				width: 18.8rem;
+				height: 18.8rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			#basicFacts h2 {
+				font-size: 2.4rem;
+			}
+
+			#moreFacts {
+				width: 18.8rem;
+				height: 18.8rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+
+			#moreFacts h3 {
+				font-size: 1.6rem;
+				line-height: 3.3rem;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="app">
+			<form>
+				<input type="text" placeholder="请输入城市名" v-model="city" id="inputBox">
+				<input type="submit" value="查询" @click.prevent="weatherQuery" id="queryButton">
+			</form>
+
+			<div id="weatherInterface">
+				<div id="basicFacts">
+					<h2>{{cityName}}</h2>
+					<h1 style="font-size: 7.1rem">{{temp}}</h1>
+					<h2>{{text}}</h2>
+				</div>
+				
+				<div id="moreFacts">
+					<h3>{{windDir}}</h3>
+					<h3>{{windSpeed}}</h3>
+					<h3>{{feelsLike}}</h3>
+					<h3>{{vis}}</h3>
+					<h3>{{pressure}}</h3>
+				</div>
+			</div>
+			
+		</div>
+
+		<script type="text/javascript">
+			var app = new Vue({
+				el: "#app",
+				data: {
+					city: '',
+					cityName: '',
+					temp: '',
+					text: '',
+					windDir: '',
+					windSpeed: '',
+					feelsLike: '',
+					vis: '',
+					pressure: '',
+				},
+
+				methods: {
+					weatherQuery:async function() {
+						var cityInformation = `https://geoapi.qweather.com/v2/city/lookup?location=${this.city}&key=fc04ea95ea334655a741436735061d10`;
+						var res = await fetch(cityInformation);
+						var result = await res.json();
+						this.cityName = result.location[0].name;
+						var cityWeather = `https://devapi.qweather.com/v7/weather/now?location=${result.location[0].id}&key=fc04ea95ea334655a741436735061d10`;
+						res = await fetch(cityWeather);
+						result = await res.json();
+						var now = result.now;
+						this.temp = now.temp + '°';
+						this.text = now.text;
+						this.windDir = '风向：' + now.windDir;
+						this.windSpeed = '风速：' + now.windSpeed + '公里/小时';
+						this.feelsLike = '体感温度：' + now.feelsLike + '°';
+						this.vis = '能见度：' + now.vis + '公里';
+						this.pressure = '大气压强：' + now.pressure + '百帕';
+					},
+				},
+			})
+		</script>
+	</body>
+</html>
